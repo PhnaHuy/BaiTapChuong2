@@ -31,10 +31,10 @@ def choose_image():
 	global current_image_bgr
 
 	image_path = filedialog.askopenfilename(
-		title="Chon anh tu may tinh",
+		title="Select an Image",
 		filetypes=[
-			("Tep hinh anh", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
-			("Tat ca tep", "*.*"),
+			("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
+			("All Files", "*.*"),
 		],
 	)
 	if not image_path:
@@ -44,18 +44,18 @@ def choose_image():
 		image_data = np.fromfile(image_path, dtype=np.uint8)
 		image_bgr = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 	except (OSError, cv2.error) as error:
-		messagebox.showerror("Loi doc anh", f"Khong the doc anh:\n{error}")
+		messagebox.showerror("Image Read Error", f"Could not read the image:\n{error}")
 		return
 
 	if image_bgr is None:
-		messagebox.showerror("Loi doc anh", "Tep duoc chon khong phai anh hop le.")
+		messagebox.showerror("Image Read Error", "The selected file is not a valid image.")
 		return
 
 	current_image_bgr = image_bgr
 	display_image(original_label, cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB))
-	gray_label.configure(image="", text="Nhan 'Chuyen mau' de xem anh greyscale")
+	gray_label.configure(image="", text="Click 'Convert Colors' to view the grayscale image")
 	gray_label.image = None
-	hsv_label.configure(image="", text="Nhan 'Chuyen mau' de xem anh HSV")
+	hsv_label.configure(image="", text="Click 'Convert Colors' to view the HSV channels")
 	hsv_label.image = None
 	status_label.configure(text=f"{image_path}  |  {image_bgr.shape[1]} x {image_bgr.shape[0]} px")
 
@@ -78,10 +78,10 @@ def convert_colors():
 
 def choose_bitwise_image(image_index):
 	image_path = filedialog.askopenfilename(
-		title=f"Chon anh {image_index + 1}",
+		title=f"Select Image {image_index + 1}",
 		filetypes=[
-			("Tep hinh anh", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
-			("Tat ca tep", "*.*"),
+			("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
+			("All Files", "*.*"),
 		],
 	)
 	if not image_path:
@@ -91,11 +91,11 @@ def choose_bitwise_image(image_index):
 		image_data = np.fromfile(image_path, dtype=np.uint8)
 		image_bgr = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 	except (OSError, cv2.error) as error:
-		messagebox.showerror("Loi doc anh", f"Khong the doc anh:\n{error}")
+		messagebox.showerror("Image Read Error", f"Could not read the image:\n{error}")
 		return
 
 	if image_bgr is None:
-		messagebox.showerror("Loi doc anh", "Tep duoc chon khong phai anh hop le.")
+		messagebox.showerror("Image Read Error", "The selected file is not a valid image.")
 		return
 
 	bitwise_images[image_index] = image_bgr
@@ -103,7 +103,7 @@ def choose_bitwise_image(image_index):
 	preview_label = bitwise_image1_label if image_index == 0 else bitwise_image2_label
 	display_image(preview_label, cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB))
 	bitwise_status_label.configure(
-		text=f"Da chon anh {image_index + 1}: {image_path}  |  {image_bgr.shape[1]} x {image_bgr.shape[0]} px"
+		text=f"Image {image_index + 1}: {image_path}  |  {image_bgr.shape[1]} x {image_bgr.shape[0]} px"
 	)
 	if all(image is not None for image in bitwise_images):
 		bitwise_button.configure(state=tk.NORMAL)
@@ -122,9 +122,9 @@ def apply_bitwise_and():
 	display_image(bitwise_result_label, cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
 	bitwise_status_label.configure(
 		text=(
-			f"AND theo tung pixel | Kich thuoc ket qua: {width} x {height} px"
-			f" | Anh 1: {bitwise_paths[0]}"
-			f" | Anh 2: {bitwise_paths[1]}"
+			f"Pixel-wise AND | Result size: {width} x {height} px"
+			f" | Image 1: {bitwise_paths[0]}"
+			f" | Image 2: {bitwise_paths[1]}"
 		)
 	)
 
@@ -133,10 +133,10 @@ def choose_video():
 	global selected_video_path
 
 	video_path = filedialog.askopenfilename(
-		title="Chon video tu may tinh",
+		title="Select a Video",
 		filetypes=[
-			("Tep video", "*.mp4 *.avi *.mov *.mkv *.wmv *.m4v *.webm"),
-			("Tat ca tep", "*.*"),
+			("Video Files", "*.mp4 *.avi *.mov *.mkv *.wmv *.m4v *.webm"),
+			("All Files", "*.*"),
 		],
 	)
 	if not video_path:
@@ -144,7 +144,7 @@ def choose_video():
 
 	selected_video_path = video_path
 	video_path_label.configure(text=video_path)
-	video_export_status.configure(text="San sang xuat moi 2 giay mot khung hinh.")
+	video_export_status.configure(text="Ready to extract one frame every 2 seconds.")
 	export_frames_button.configure(state=tk.NORMAL)
 
 
@@ -152,14 +152,14 @@ def export_video_frames():
 	if not selected_video_path:
 		return
 
-	output_directory = filedialog.askdirectory(title="Chon thu muc luu anh")
+	output_directory = filedialog.askdirectory(title="Select an Output Folder")
 	if not output_directory:
 		return
 
 	video_path = selected_video_path
 	image_extension = image_format_var.get()
 	export_frames_button.configure(state=tk.DISABLED)
-	video_export_status.configure(text="Dang trich xuat khung hinh... Vui long cho.")
+	video_export_status.configure(text="Extracting video frames... Please wait.")
 	Thread(
 		target=extract_video_frames,
 		args=(video_path, output_directory, image_extension),
@@ -171,13 +171,13 @@ def extract_video_frames(video_path, output_directory, image_extension):
 	video = cv2.VideoCapture(video_path)
 	if not video.isOpened():
 		video.release()
-		root.after(0, finish_video_export, 0, "Khong the mo tep video.")
+		root.after(0, finish_video_export, 0, "Could not open the video file.")
 		return
 
 	fps = video.get(cv2.CAP_PROP_FPS)
 	if not np.isfinite(fps) or fps <= 0:
 		video.release()
-		root.after(0, finish_video_export, 0, "Khong doc duoc toc do khung hinh cua video.")
+		root.after(0, finish_video_export, 0, "Could not read the video's frame rate.")
 		return
 
 	frame_interval = max(1, int(round(fps * 2)))
@@ -195,7 +195,7 @@ def extract_video_frames(video_path, output_directory, image_extension):
 				output_path = f"{output_directory}/frame_{saved_count:04d}{image_extension}"
 				encode_success, encoded_image = cv2.imencode(image_extension, frame)
 				if not encode_success:
-					error_message = f"Khong the ma hoa khung hinh {saved_count + 1}."
+					error_message = f"Could not encode frame {saved_count + 1}."
 					break
 				encoded_image.tofile(output_path)
 				saved_count += 1
@@ -203,7 +203,7 @@ def extract_video_frames(video_path, output_directory, image_extension):
 
 			frame_index += 1
 	except OSError as error:
-		error_message = f"Loi ghi tep anh: {error}"
+		error_message = f"Image write error: {error}"
 	finally:
 		video.release()
 
@@ -213,24 +213,24 @@ def extract_video_frames(video_path, output_directory, image_extension):
 def finish_video_export(saved_count, error_message, output_directory=None):
 	export_frames_button.configure(state=tk.NORMAL)
 	if error_message:
-		video_export_status.configure(text=f"Da xuat {saved_count} anh. {error_message}")
-		messagebox.showerror("Loi xuat khung hinh", error_message)
+		video_export_status.configure(text=f"Exported {saved_count} images. {error_message}")
+		messagebox.showerror("Frame Export Error", error_message)
 	elif saved_count:
 		video_export_status.configure(
-			text=f"Da xuat {saved_count} anh vao thu muc: {output_directory}"
+			text=f"Exported {saved_count} images to: {output_directory}"
 		)
 	else:
-		video_export_status.configure(text="Video khong co khung hinh de xuat.")
+		video_export_status.configure(text="The video contains no frames to export.")
 
 
 def choose_adjustment_image():
 	global adjustment_image_bgr
 
 	image_path = filedialog.askopenfilename(
-		title="Chon anh can dieu chinh",
+		title="Select an Image to Adjust",
 		filetypes=[
-			("Tep hinh anh", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
-			("Tat ca tep", "*.*"),
+			("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
+			("All Files", "*.*"),
 		],
 	)
 	if not image_path:
@@ -240,11 +240,11 @@ def choose_adjustment_image():
 		image_data = np.fromfile(image_path, dtype=np.uint8)
 		image_bgr = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 	except (OSError, cv2.error) as error:
-		messagebox.showerror("Loi doc anh", f"Khong the doc anh:\n{error}")
+		messagebox.showerror("Image Read Error", f"Could not read the image:\n{error}")
 		return
 
 	if image_bgr is None:
-		messagebox.showerror("Loi doc anh", "Tep duoc chon khong phai anh hop le.")
+		messagebox.showerror("Image Read Error", "The selected file is not a valid image.")
 		return
 
 	adjustment_image_bgr = image_bgr
@@ -283,10 +283,10 @@ def choose_canvas_image():
 	global canvas_source_image, canvas_rotation_degrees, canvas_image_item, canvas_image_photo
 
 	image_path = filedialog.askopenfilename(
-		title="Chon anh de dua vao canvas",
+		title="Select an Image for the Canvas",
 		filetypes=[
-			("Tep hinh anh", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
-			("Tat ca tep", "*.*"),
+			("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.webp"),
+			("All Files", "*.*"),
 		],
 	)
 	if not image_path:
@@ -296,11 +296,11 @@ def choose_canvas_image():
 		image_data = np.fromfile(image_path, dtype=np.uint8)
 		image_bgr = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 	except (OSError, cv2.error) as error:
-		messagebox.showerror("Loi doc anh", f"Khong the doc anh:\n{error}")
+		messagebox.showerror("Image Read Error", f"Could not read the image:\n{error}")
 		return
 
 	if image_bgr is None:
-		messagebox.showerror("Loi doc anh", "Tep duoc chon khong phai anh hop le.")
+		messagebox.showerror("Image Read Error", "The selected file is not a valid image.")
 		return
 
 	canvas_source_image = Image.fromarray(cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB))
@@ -342,8 +342,8 @@ def render_canvas_image(*_):
 
 	canvas_info_label.configure(
 		text=(
-			f"Anh {width} x {height} px  |  Zoom: {int(float(canvas_zoom_var.get()))}%"
-			f"  |  Goc xoay: {canvas_rotation_degrees % 360} do"
+			f"Image: {width} x {height} px  |  Zoom: {int(float(canvas_zoom_var.get()))}%"
+			f"  |  Rotation: {canvas_rotation_degrees % 360} degrees"
 		)
 	)
 
@@ -386,7 +386,7 @@ def drag_canvas_image(event):
 
 
 root = tk.Tk()
-root.title("Mo va hien thi anh")
+root.title("Image Processing Toolkit")
 root.geometry("1450x780")
 root.minsize(850, 500)
 
@@ -398,19 +398,19 @@ bitwise_tab = tk.Frame(notebook)
 video_tab = tk.Frame(notebook)
 adjustment_tab = tk.Frame(notebook)
 canvas_tab = tk.Frame(notebook)
-notebook.add(color_tab, text="Chuyen mau")
+notebook.add(color_tab, text="Color Conversion")
 notebook.add(bitwise_tab, text="Bitwise AND")
-notebook.add(video_tab, text="Trich khung hinh video")
+notebook.add(video_tab, text="Video Frame Extraction")
 notebook.add(adjustment_tab, text="Brightness / Saturation")
-notebook.add(canvas_tab, text="Canvas: xoay / zoom")
+notebook.add(canvas_tab, text="Image Canvas")
 
 toolbar = tk.Frame(color_tab)
 toolbar.pack(fill=tk.X, padx=12, pady=12)
 
-select_button = tk.Button(toolbar, text="Chon anh", command=choose_image, padx=16, pady=8)
+select_button = tk.Button(toolbar, text="Select Image", command=choose_image, padx=16, pady=8)
 select_button.pack(side=tk.LEFT)
 
-convert_button = tk.Button(toolbar, text="Chuyen mau", command=convert_colors, padx=16, pady=8, state=tk.DISABLED)
+convert_button = tk.Button(toolbar, text="Convert Colors", command=convert_colors, padx=16, pady=8, state=tk.DISABLED)
 convert_button.pack(side=tk.LEFT, padx=(8, 0))
 
 images_frame = tk.Frame(color_tab)
@@ -419,14 +419,14 @@ for column in range(3):
 	images_frame.columnconfigure(column, weight=1, uniform="images")
 images_frame.rowconfigure(0, weight=1)
 
-original_frame = tk.LabelFrame(images_frame, text="Anh goc")
+original_frame = tk.LabelFrame(images_frame, text="Original Image")
 original_frame.grid(row=0, column=0, sticky="nsew", padx=5)
 gray_frame = tk.LabelFrame(images_frame, text="Greyscale")
 gray_frame.grid(row=0, column=1, sticky="nsew", padx=5)
-hsv_frame = tk.LabelFrame(images_frame, text="HSV (kenh H/S/V)")
+hsv_frame = tk.LabelFrame(images_frame, text="HSV Channels (H/S/V)")
 hsv_frame.grid(row=0, column=2, sticky="nsew", padx=5)
 
-original_label = tk.Label(original_frame, text="Chon mot anh de bat dau", bg="#eeeeee")
+original_label = tk.Label(original_frame, text="Select an image to get started", bg="#eeeeee")
 original_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 gray_label = tk.Label(gray_frame, text="", bg="#eeeeee")
 gray_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -440,21 +440,21 @@ bitwise_toolbar = tk.Frame(bitwise_tab)
 bitwise_toolbar.pack(fill=tk.X, padx=12, pady=12)
 tk.Button(
 	bitwise_toolbar,
-	text="Chon anh 1",
+	text="Select Image 1",
 	command=lambda: choose_bitwise_image(0),
 	padx=16,
 	pady=8,
 ).pack(side=tk.LEFT)
 tk.Button(
 	bitwise_toolbar,
-	text="Chon anh 2",
+	text="Select Image 2",
 	command=lambda: choose_bitwise_image(1),
 	padx=16,
 	pady=8,
 ).pack(side=tk.LEFT, padx=(8, 0))
 bitwise_button = tk.Button(
 	bitwise_toolbar,
-	text="Ap dung AND",
+	text="Apply AND",
 	command=apply_bitwise_and,
 	padx=16,
 	pady=8,
@@ -468,18 +468,18 @@ for column in range(3):
 	bitwise_images_frame.columnconfigure(column, weight=1, uniform="bitwise_images")
 bitwise_images_frame.rowconfigure(0, weight=1)
 
-bitwise_image1_frame = tk.LabelFrame(bitwise_images_frame, text="Anh 1")
+bitwise_image1_frame = tk.LabelFrame(bitwise_images_frame, text="Image 1")
 bitwise_image1_frame.grid(row=0, column=0, sticky="nsew", padx=5)
-bitwise_image2_frame = tk.LabelFrame(bitwise_images_frame, text="Anh 2")
+bitwise_image2_frame = tk.LabelFrame(bitwise_images_frame, text="Image 2")
 bitwise_image2_frame.grid(row=0, column=1, sticky="nsew", padx=5)
-bitwise_result_frame = tk.LabelFrame(bitwise_images_frame, text="Ket qua Bitwise AND")
+bitwise_result_frame = tk.LabelFrame(bitwise_images_frame, text="Bitwise AND Result")
 bitwise_result_frame.grid(row=0, column=2, sticky="nsew", padx=5)
 
-bitwise_image1_label = tk.Label(bitwise_image1_frame, text="Chua chon anh 1", bg="#eeeeee")
+bitwise_image1_label = tk.Label(bitwise_image1_frame, text="No image selected", bg="#eeeeee")
 bitwise_image1_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-bitwise_image2_label = tk.Label(bitwise_image2_frame, text="Chua chon anh 2", bg="#eeeeee")
+bitwise_image2_label = tk.Label(bitwise_image2_frame, text="No image selected", bg="#eeeeee")
 bitwise_image2_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-bitwise_result_label = tk.Label(bitwise_result_frame, text="Chon hai anh va ap dung AND", bg="#eeeeee")
+bitwise_result_label = tk.Label(bitwise_result_frame, text="Select two images and apply AND", bg="#eeeeee")
 bitwise_result_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
 bitwise_status_label = tk.Label(bitwise_tab, text="", anchor="w", justify=tk.LEFT, wraplength=1400)
@@ -489,12 +489,12 @@ video_toolbar = tk.Frame(video_tab)
 video_toolbar.pack(fill=tk.X, padx=12, pady=12)
 tk.Button(
 	video_toolbar,
-	text="Chon video",
+	text="Select Video",
 	command=choose_video,
 	padx=16,
 	pady=8,
 ).pack(side=tk.LEFT)
-tk.Label(video_toolbar, text="Dinh dang anh:").pack(side=tk.LEFT, padx=(16, 6))
+tk.Label(video_toolbar, text="Image format:").pack(side=tk.LEFT, padx=(16, 6))
 image_format_var = tk.StringVar(value=".jpg")
 ttk.Combobox(
 	video_toolbar,
@@ -505,7 +505,7 @@ ttk.Combobox(
 ).pack(side=tk.LEFT)
 export_frames_button = tk.Button(
 	video_toolbar,
-	text="Xuat hinh",
+	text="Export Frames",
 	command=export_video_frames,
 	padx=16,
 	pady=8,
@@ -513,7 +513,7 @@ export_frames_button = tk.Button(
 )
 export_frames_button.pack(side=tk.LEFT, padx=(12, 0))
 
-video_path_label = tk.Label(video_tab, text="Chua chon video", anchor="w", justify=tk.LEFT, wraplength=1400)
+video_path_label = tk.Label(video_tab, text="No video selected", anchor="w", justify=tk.LEFT, wraplength=1400)
 video_path_label.pack(fill=tk.X, padx=12, pady=(8, 4))
 video_export_status = tk.Label(video_tab, text="", anchor="w", justify=tk.LEFT, wraplength=1400)
 video_export_status.pack(fill=tk.X, padx=12, pady=4)
@@ -522,14 +522,14 @@ adjustment_toolbar = tk.Frame(adjustment_tab)
 adjustment_toolbar.pack(fill=tk.X, padx=12, pady=12)
 tk.Button(
 	adjustment_toolbar,
-	text="Chon anh",
+	text="Select Image",
 	command=choose_adjustment_image,
 	padx=16,
 	pady=8,
 ).pack(side=tk.LEFT)
 tk.Button(
 	adjustment_toolbar,
-	text="Dat lai",
+	text="Reset",
 	command=reset_adjustments,
 	padx=16,
 	pady=8,
@@ -573,11 +573,11 @@ for column in range(2):
 	adjustment_images_frame.columnconfigure(column, weight=1, uniform="adjustment_images")
 adjustment_images_frame.rowconfigure(0, weight=1)
 
-adjustment_original_frame = tk.LabelFrame(adjustment_images_frame, text="Anh goc")
+adjustment_original_frame = tk.LabelFrame(adjustment_images_frame, text="Original Image")
 adjustment_original_frame.grid(row=0, column=0, sticky="nsew", padx=5)
-adjustment_result_frame = tk.LabelFrame(adjustment_images_frame, text="Anh sau dieu chinh")
+adjustment_result_frame = tk.LabelFrame(adjustment_images_frame, text="Adjusted Image")
 adjustment_result_frame.grid(row=0, column=1, sticky="nsew", padx=5)
-adjustment_original_label = tk.Label(adjustment_original_frame, text="Chon anh de bat dau", bg="#eeeeee")
+adjustment_original_label = tk.Label(adjustment_original_frame, text="Select an image to get started", bg="#eeeeee")
 adjustment_original_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 adjustment_result_label = tk.Label(adjustment_result_frame, text="", bg="#eeeeee")
 adjustment_result_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -588,34 +588,34 @@ canvas_toolbar = tk.Frame(canvas_tab)
 canvas_toolbar.pack(fill=tk.X, padx=12, pady=12)
 tk.Button(
 	canvas_toolbar,
-	text="Mo anh",
+	text="Open Image",
 	command=choose_canvas_image,
 	padx=16,
 	pady=8,
 ).pack(side=tk.LEFT)
 tk.Button(
 	canvas_toolbar,
-	text="Xoay trai (CCW)",
+	text="Rotate Left (CCW)",
 	command=lambda: rotate_canvas_image(1),
 	padx=12,
 	pady=8,
 ).pack(side=tk.LEFT, padx=(8, 0))
 tk.Button(
 	canvas_toolbar,
-	text="Xoay phai (CW)",
+	text="Rotate Right (CW)",
 	command=lambda: rotate_canvas_image(-1),
 	padx=12,
 	pady=8,
 ).pack(side=tk.LEFT, padx=(8, 0))
 canvas_zoom_var = tk.DoubleVar(value=100)
-tk.Label(canvas_toolbar, text="Dung con lan de thu/phong anh").pack(side=tk.LEFT, padx=(18, 0))
+tk.Label(canvas_toolbar, text="Use the mouse wheel to zoom").pack(side=tk.LEFT, padx=(18, 0))
 
 canvas_widget = tk.Canvas(canvas_tab, bg="#25282c", highlightthickness=0, cursor="fleur")
 canvas_widget.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 8))
 canvas_widget.bind("<ButtonPress-1>", start_canvas_drag)
 canvas_widget.bind("<B1-Motion>", drag_canvas_image)
 canvas_widget.bind("<MouseWheel>", zoom_canvas_with_wheel)
-canvas_info_label = tk.Label(canvas_tab, text="Chon anh de hien thi tren canvas", anchor="w")
+canvas_info_label = tk.Label(canvas_tab, text="Select an image to display on the canvas", anchor="w")
 canvas_info_label.pack(fill=tk.X, padx=12, pady=(4, 12))
 
 root.mainloop()
